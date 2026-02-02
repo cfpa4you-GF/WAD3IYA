@@ -25,21 +25,59 @@
     <script type="importmap">
     {
       "imports": {
-        "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-        "react/": "https://esm.sh/react@^19.2.3/",
-        "react": "https://esm.sh/react@^19.2.3",
-        "jspdf": "https://esm.sh/jspdf@^2.5.1",
-        "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
-        "docx": "https://esm.sh/docx@^8.5.0",
-        "file-saver": "https://esm.sh/file-saver@^2.0.5"
+        "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
       }
     }
     </script>
-
-    <script type="module" crossorigin src="./assets/index-EYg68WiO.js"></script>
   </head>
   <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-    <div id="root"></div>
+    <div class="max-w-xl mx-auto p-4">
+      <h1 class="text-2xl font-bold mb-4">مولد الوضعيات الإدماجية</h1>
+
+      <input id="niveau" placeholder="أدخل المستوى الدراسي" class="border p-2 mb-2 w-full rounded" />
+      <input id="matiere" placeholder="أدخل المادة" class="border p-2 mb-2 w-full rounded" />
+      <input id="lesson" placeholder="أدخل اسم الدرس" class="border p-2 mb-2 w-full rounded" />
+      <button id="generateBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">توليد الوضعية</button>
+
+      <div id="result" class="mt-4 p-4 border rounded bg-white dark:bg-gray-800 min-h-[100px]"></div>
+    </div>
+
+    <script type="module">
+      import { TextGenerationClient } from "@google/genai";
+
+      // تهيئة العميل مع المفتاح الخاص بك
+      const client = new TextGenerationClient({
+        apiKey: "AIzaSyCWfcC_HylmTDduxhAOPs2Clce-j-gRr2o"
+      });
+
+      const btn = document.getElementById("generateBtn");
+      const resultDiv = document.getElementById("result");
+
+      btn.addEventListener("click", async () => {
+        const niveau = document.getElementById("niveau").value.trim();
+        const matiere = document.getElementById("matiere").value.trim();
+        const lesson = document.getElementById("lesson").value.trim();
+
+        if (!niveau || !matiere || !lesson) {
+          resultDiv.textContent = "يرجى ملء جميع الحقول";
+          return;
+        }
+
+        const prompt = `اكتب وضعية إدماجية للسنة ${niveau} في مادة ${matiere} حول الدرس "${lesson}"`;
+
+        resultDiv.textContent = "جاري التوليد... ⏳";
+
+        try {
+          const response = await client.generateText({
+            model: "text-bison-001",
+            prompt: prompt,
+            maxOutputTokens: 300
+          });
+          resultDiv.textContent = response.candidates[0].content;
+        } catch (err) {
+          resultDiv.textContent = "حدث خطأ: " + err.message;
+        }
+      });
+    </script>
   </body>
 </html>
